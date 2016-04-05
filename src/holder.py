@@ -1,18 +1,12 @@
-''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-									This file implements server decision making commponent for ECE 5574 class project.
-''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
 from __future__ import print_function
 import json
 import httplib
+import time
 
-'''
-This function is the main entry point and it receives events from amazon dynamodb, and calls the appropriate handlers.
-'''
 def lambda_handler(event, context):
     for record in event['Records']:
         temp = record['dynamodb']
-        
+        print(record['eventName'], "EventName")
         if record['eventName'] == 'MODIFY':
             if record['eventSourceARN'].find("sensors") >= 0:
                 message = (parseSensor(temp['OldImage'], temp['NewImage'], record['eventName']))
@@ -21,18 +15,21 @@ def lambda_handler(event, context):
                         emergencyLogic(message)
             elif record['eventSourceARN'].find("users") >= 0:
                 message = (parseUser(temp['OldImage'], temp['NewImage'], record['eventName']))
+                print(message)
                 if message:
                     processUserMessage(message)
                 
         elif record['eventName'] == "INSERT":
+            print(record['eventSourceARN'])
             if record['eventSourceARN'].find("sensors") >= 0:
                 message = (parseSensor(0, temp['NewImage'], record['eventName']))
-            elif record['eventSourceARN'].find("users") >= 0:
+            elif record['eventSourceARN'].find("User") >= 0:
                 message = (parseUser(0, temp['NewImage'], record['eventName']))
             elif record['eventSourceARN'].find("robots") >= 0:
                 message = parseRobot(temp['NewImage'])
-                
-            newObjectLogic(message)
+            
+            if(message):
+                newObjectLogic(message)
     
 '''
 This function parses a sensor object, and determines if something
@@ -77,16 +74,19 @@ pertinent information to be sent in a message to whoever requires it.
 '''
 def parseUser(old, new, eventName):
     if eventName == "INSERT":
+        
+        
+        print(new, "new here")
         #if it is a new sensor
         emergency = {
                         "from": "new user",
-                        "id": new['id']['S'],
-                        "buildingId": new['buildingId']['S'],
+                        "id": ["mfeneley_test"],
+                        "buildingID": "-1",
                         "room": new['room']['N'],
                         "xpos": new['xpos']['N'],
                         "ypos": new['ypos']['N'],
                         "floor": new['floor']['N'],
-                        "owner": new['owner']['BOOL']
+                        "owner": new['owner']['N']
                     }
         return emergency
     elif old['message']['S'] == new['message']['S']:
@@ -141,8 +141,25 @@ Generates a POST request to the push notification team that sends a message
 to them for them to store
 '''
 def generatePOST(message):
+    
+    test_object2 = {
+                        "id":  ["mfeneley_test"], 
+                        "message": {
+                            "msg_type": "alert", 
+                            "body":{ "buildingId":"7", 
+                            "new_id": "8",
+                            "xpos": "9", 
+                            "ypos": "10", 
+                            "room": "11",
+                            "floor": "12", 
+                            "owner": "Sam"
+                             }
+                         }
+                      }    
     params = json.dumps(message) #necessary to format message in string format
-    print(params)
+    params2 = json.dumps(test_object2)
+    print(params2, "params2")
+    print(params, "params1")
     conn = httplib.HTTPSConnection("2bj29vv7f3.execute-api.us-east-1.amazonaws.com")
     headers = {
 	    'x-api-key': "F2yxLdt3dNfvsncGwl0g8eCik3OxNej3LO9M2iHj",
@@ -150,9 +167,14 @@ def generatePOST(message):
 	    }
     conn.request("POST", "/testing", params, headers)
     response = conn.getresponse()
+    print(response.status)
+    print(response, "response")    
     data = response.read()
-    print(data.decode("utf-8"))
-	
+#    print(data, "data")
+#    print("response")
+#    print(data.decode("utf-8"))
+#    print("end")
+
 def newObjectLogic(json_object):
 	add_object = {}
 	if(json_object['from'] == 'new sensor'):
@@ -190,21 +212,22 @@ def newObjectLogic(json_object):
 						}
 					}
 	elif(json_object['from'] == 'new user'):
+		print(json_object)
 		add_object = {
-		                "id":  [json_object['buildingId']], 
+		                "id":  json_object['id'], 
 		                "message": {
 		                    "msg_type": json_object['from'], 
-					        "body":{ "buildingId":json_object['buildingId'], 
+					        "body":{ "buildingId":"-1", 
 					        "new_id": json_object['id'],
 				            "xpos": json_object['xpos'], 
 				            "ypos": json_object['ypos'], 
 				            "room": json_object['room'],
 					        "floor": json_object['floor'], 
-					        "owner": json_object['owner']
+					        "owner": "Michael"
 					         }
 					     }
 					  }
-			
+	print("Generate Post")
 	generatePOST(add_object)
 	
 '''
@@ -213,6 +236,7 @@ was not specified. This is a placeholder so the logic can be added later.
 '''
 def processUserMessage(json_object):
 	print("User message logic goes here")
+    #return 0;
 	
 '''
 This function is called when a sensor determines an emergency has occurred. This
@@ -323,10 +347,10 @@ This function determines which robots to send to handle an emergency.
 def findRobot(event_type, building):
 	#get list of robot ids for a building
 	return["0"]
-	basepath = "localhost:8080/api/"
+	basepath = "localhost"
 	robotIds = []
-	conn = httplib.HTTPConnection(basepath)
-	conn.request("GET", "buildings/" + building + "/robots/")
+	conn = httplib.HTTPConnection(basepath,8080)
+	conn.request("GET", "/api/buildings/" + str(building) + "/robots/")
 	r1 = conn.getresponse()
 	data1 = eval(r1.read())
 	conn.close()
@@ -395,27 +419,29 @@ def findBuildingOccupants(building_id):
     basePath = "localhost"
     userIds = []
     conn = httplib.HTTPConnection(basePath, 8080)
-
     conn.request("GET", "/api/users/")
     res = conn.getresponse()
-    data = res.read()
-    people = json.loads(data)
+    return res
 
+
+    """ Logic goes here... """
+    data = res.read()
+    people = eval(data)
     for person in people:
-        building = person["buildingID"]
-        if(building == building_id):
-            uid = person["id"]
-            userIds.append(uid)
-    return userIds
+    	the_id = person["id"]
+    	if(person["capabilities"] == buildingId):
+    		userIds.append(the_id)
+    return userIDs
 	
 '''
 Return true if new status equals current buildingId status else return false
 '''
 def checkBuildingStatus(event_type, building):
     return False
-    conn = httplib.HTTPConnection("localhost:8080/api/")
+    basePath = "localhost"
+    conn = httplib.HTTPConnection(basePath, 8080)
 	#search ids for the right capabilities
-    conn.request("GET", "buildings/" + building)
+    conn.request("GET", "/api/buildings/" + str(building) + "/sensors/")
     r2 = conn.getresponse()
     data2 = eval(r2.read())
     rVal = (data2["status"] == event_type)
