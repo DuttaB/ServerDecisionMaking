@@ -1,7 +1,14 @@
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+									This file implements server decision making commponent for ECE 5574 class project.
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
 from __future__ import print_function
 import json
 import httplib
 
+'''
+This function is the main entry point and it receives events from amazon dynamodb, and calls the appropriate handlers.
+'''
 def lambda_handler(event, context):
     for record in event['Records']:
         temp = record['dynamodb']
