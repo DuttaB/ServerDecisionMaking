@@ -1,4 +1,7 @@
 import unittest
+
+import sys
+sys.path.append('..')
 import sensorProcessing as process
 
 tempArr = [21,20,21,22,21,20,19,18,19,20]
