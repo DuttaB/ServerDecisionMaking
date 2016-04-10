@@ -8,7 +8,9 @@ def processWeightSensors(history, newData):
     Process Weight sensors by reading the sensor history and new incoming data 
     and determines if there's an emergency or not.
     The emergency this looks for is intruders (based on other sensors too,
-    possibly
+    possibly)
+
+    If a weight is < 45, it's asumed to be a child or robot.
     '''
     pass #for now
 
@@ -56,7 +58,7 @@ def processNewSensorData(sensorID, sensorType, newData):
     # check to see if the data has changed at all
     # Might want to check if status is still set and act accordingly
     # for now just return None
-    if not history or  history[0] == newData:
+    if not history or history[0] == newData:
         return None 
 
     if sensorType == 'weight':
@@ -64,3 +66,4 @@ def processNewSensorData(sensorID, sensorType, newData):
         
 
     db.shiftHistory(sensorID, newData)
+    return None
