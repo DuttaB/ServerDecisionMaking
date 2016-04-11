@@ -1,5 +1,5 @@
 import unittest
-
+import collections
 import sys
 sys.path.append('..')
 import sensorProcessing as process
@@ -138,6 +138,13 @@ def getUsersInRoom(room):
     '''
     return userList
 
+def getPosition(sensorID):
+    '''
+    Returns a dummy position for the sensor.
+    '''
+    Position = collections.namedtuple('Position', 'room floor x y')
+    pos = Position(room=2, floor=1, x=20, y=10)
+    return pos
 
 class TestSensorProcessing(unittest.TestCase):
     def setUp(self):
@@ -228,6 +235,16 @@ class TestSensorProcessing(unittest.TestCase):
         emergency = process.processNewSensorData('door', 'door', 1)
         self.assertIsNotNone(emergency)
 
+    def test_createEmergency(self):
+        emergency = process.createEmergency('fire', 'fire', 10)
+        #We know what the dummy values are so just check that they get returned
+        self.assertIsNotNone(emergency)
+        self.assertEquals('fire', emergency['msg type'])
+        self.assertEquals(2, emergency['body']['room'])
+        self.assertEquals(1, emergency['body']['floor'])
+        self.assertEquals(20, emergency['body']['xpos'])
+        self.assertEquals(10, emergency['body']['ypos'])
+        self.assertEquals(10, emergency['body']['severity'])
 
 
 

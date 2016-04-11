@@ -2,6 +2,34 @@
 # This import will change when we don't do dummy processing anymore
 import sensorProcessingTest as db
 
+def createEmergency(msgType, sensorID, severity):
+    '''
+    create and return an emergency JSON object.  This will only be partially 
+    filled in, as we won't know which robots to handle the emergency
+    or anything else really.  We'll only have static details.  
+    The returned emergency will look like this:
+    {
+        'msg type': 'fire',
+        'body': {
+            'buildingID': bid,
+            'room': room,
+            'floor': floor,
+            'xpos': x,
+            'ypos': y,
+            'severity': sev,
+        }
+    }
+    '''
+    pos = db.getPosition(sensorID)
+    emergency = {}
+    emergency['msg type'] = msgType
+    emergency['body'] = {}
+    emergency['body']['room'] = pos.room
+    emergency['body']['floor'] = pos.floor
+    emergency['body']['xpos'] = pos.x
+    emergency['body']['ypos'] = pos.y
+    emergency['body']['severity'] = severity
+    return emergency
 
 def processWeightSensors(history, newData):
     '''
