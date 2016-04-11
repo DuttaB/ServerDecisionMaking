@@ -15,10 +15,10 @@ def checkIntruder(building_id, floor_id, room_id, xpos_id, ypos_id):
 
     for person in people:
         building = person["buildingID"]
-        oor = person["floor"]
-        om = person["room"]
-        os = person["xpos"]
-        os = person["ypos"]
+        floor = person["floor"]
+        room = person["room"]
+        xpos = person["xpos"]
+        ypos = person["ypos"]
         if(building == building_id and floor == floor_id and xpos == xpos_id and ypos == ypos_id):
             uid = person["id"]
             
