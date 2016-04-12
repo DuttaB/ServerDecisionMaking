@@ -1,11 +1,10 @@
 """
-This is the automatic test for function getSensorData(sensor_type, building, room).
+This is the automatic test for function getSensorData(sensor_type, buildingId, room).
 Chang Sun, 4/11/2016
 """
 
 import http.client
 import json
-import time
 import unittest
 from getSensorData import *
 
@@ -78,49 +77,53 @@ def createObjects():
 # ________________________________________________________________
 
 class TestGetSensorData(unittest.TestCase):
-    def test_building0(self):
+
+    def __init__(self, *args, **kwargs):
+        super(TestGetSensorData, self).__init__(*args, **kwargs)
+        createObjects()
+
+    def test(self):
+        # building 0
         # room0
         sensorData_IR_room0 = getSensorData('IR', buildingIds[0], 0)
         self.assertEqual(sensorData_IR_room0,
-                         [sensorIds[buildingIds[0]][0], sensorIds[buildingIds[0]][2]])
+                         {x : x for x in [sensorIds[buildingIds[0]][0], sensorIds[buildingIds[0]][2]]})
         sensorData_Sonar_room0 = getSensorData('Sonar', buildingIds[0], 0)
         self.assertEqual(sensorData_Sonar_room0,
-                         [sensorIds[buildingIds[0]][1]])
+                         {x : x for x in [sensorIds[buildingIds[0]][1]]})
         # room1
         sensorData_IR_room1 = getSensorData('IR', buildingIds[0], 1)
         self.assertEqual(sensorData_IR_room1,
-                         [sensorIds[buildingIds[0]][4]])
+                         {x : x for x in [sensorIds[buildingIds[0]][4]]})
         sensorData_Sonar_room1 = getSensorData('Sonar', buildingIds[0], 1)
         self.assertEqual(sensorData_Sonar_room1,
-                         [sensorIds[buildingIds[0]][3], sensorIds[buildingIds[0]][5]])
-
+                         {x : x for x in [sensorIds[buildingIds[0]][3], sensorIds[buildingIds[0]][5]]})
         # room2
         sensorData_IR_room2 = getSensorData('IR', buildingIds[0], 2)
         self.assertEqual(sensorData_IR_room2,
-                         [sensorIds[buildingIds[0]][6], sensorIds[buildingIds[0]][8]])
+                         {x : x for x in [sensorIds[buildingIds[0]][6], sensorIds[buildingIds[0]][8]]})
         sensorData_Sonar_room2 = getSensorData('Sonar', buildingIds[0], 2)
         self.assertEqual(sensorData_Sonar_room2,
-                         [sensorIds[buildingIds[0]][7]])
+                         {x : x for x in [sensorIds[buildingIds[0]][7]]})
 
-    def test_building1(self):
+        # building 1
         # room0
         sensorData_IR_room0 = getSensorData('IR', buildingIds[1], 0)
         self.assertEqual(sensorData_IR_room0,
-                         [sensorIds[buildingIds[1]][0]])
+                         {x : x for x in [sensorIds[buildingIds[1]][0]]})
         sensorData_Sonar_room0 = getSensorData('Sonar', buildingIds[1], 0)
         self.assertEqual(sensorData_Sonar_room0,
-                         [sensorIds[buildingIds[1]][1]])
+                         {x : x for x in [sensorIds[buildingIds[1]][1]]})
         # room1
         sensorData_IR_room1 = getSensorData('IR', buildingIds[1], 1)
         self.assertEqual(sensorData_IR_room1,
-                         [sensorIds[buildingIds[1]][2]])
+                         {x : x for x in [sensorIds[buildingIds[1]][2]]})
         sensorData_Sonar_room1 = getSensorData('Sonar', buildingIds[1], 1)
         self.assertEqual(sensorData_Sonar_room1,
-                         [sensorIds[buildingIds[1]][3]])
+                         {x : x for x in [sensorIds[buildingIds[1]][3]]})
 
 # ________________________________________________________________
 
 if __name__ == '__main__':
-    createObjects()
     unittest.main()
 # ________________________________________________________________
