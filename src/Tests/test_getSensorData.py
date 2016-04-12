@@ -62,9 +62,7 @@ def createObjects():
                          payload, {'content-type': 'application/json'})
             print(conn.getresponse().read().decode('utf-8'))
 
-    deleteAllBuildings()
-    print('All buildings deleted.')
-
+    print('******Creating objects for test cases******')
     for i in range(NUM_BUILDINGS):
         buildingIds.append(postAndGetBuildingId())
         print('Created building%d with id=%s' % (i, buildingIds[i]))
@@ -73,6 +71,7 @@ def createObjects():
         sensorIds[buildingIds[i]] = postAndGetSensorIdOfBuilding(i)
         print('Created sensors for building%d, ids=%s' % (i, sensorIds[buildingIds[i]]))
         putSensorForBuilding(i)
+    print('******Finished creating objects for test cases******')
 
 # ________________________________________________________________
 
@@ -83,6 +82,7 @@ class TestGetSensorData(unittest.TestCase):
         createObjects()
 
     def test(self):
+        print('******Running test cases******')
         # building 0
         # room0
         sensorData_IR_room0 = getSensorData('IR', buildingIds[0], 0)
@@ -121,6 +121,8 @@ class TestGetSensorData(unittest.TestCase):
         sensorData_Sonar_room1 = getSensorData('Sonar', buildingIds[1], 1)
         self.assertEqual(sensorData_Sonar_room1,
                          {x : x for x in [sensorIds[buildingIds[1]][3]]})
+
+        print('******Finished running test cases******')
 
 # ________________________________________________________________
 
