@@ -26,7 +26,6 @@ def getSensorHistory(sensorID):
     global doorArr
     global weightArr
     global noneArr
-    print hex(id(smokeArr))
     if sensorID == 'temp':
         return tempArr
     if sensorID == 'smoke':
@@ -55,7 +54,6 @@ def shiftHistory(sensorID, newData):
     global doorArr
     global weightArr
     global noneArr
-    print hex(id(smokeArr))
     if sensorID == 'temp':
         tempArr.insert(0,newData)
     if sensorID == 'smoke':
@@ -78,8 +76,6 @@ def getSensorData(sensorType, buildingID, room):
     global waterArr
     global doorArr
     global weightArr
-    print 'getting sensor data'
-    print hex(id(smokeArr))
     sensors = {}
     if sensorType == 'smoke':
         sensors['smokeid'] = smokeArr[0]
@@ -88,7 +84,7 @@ def getSensorData(sensorType, buildingID, room):
     if sensorType == 'temperature':
         sensors['tempid'] = tempArr[0]
     if sensorType == 'gas':
-        sensors['gasid'] = gas[0]
+        sensors['gasid'] = gasArr[0]
     if sensorType == 'water pressure':
         sensors['water pressure id'] = waterArr[0]
     return sensors
@@ -130,5 +126,6 @@ def setUpLists():
     noneArr = []
     noWeightArr = ['0']
     userList = []
-    print 'set up smoke sensor: '
-    print hex(id(smokeArr))
+
+def addUser(userId):
+    userList.insert(0,userId)

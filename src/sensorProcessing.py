@@ -41,7 +41,6 @@ class sensorProcessing(object):
             self.storage.getSensorHistory('smoke')
             smokeSensors = self.storage.getSensorData('smoke',\
                     sensor['buildingId'], sensor['room'])
-            print smokeSensors
             for val in smokeSensors.values():
                 if val == '1':
                     emergency = 'fire'
