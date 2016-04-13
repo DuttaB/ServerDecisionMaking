@@ -83,7 +83,7 @@ class sensorProcessing(object):
             for sensor in sensors:
                 if sensor['type'] == 'weight' and int(sensor['data']) > 80:
                     #weight sensor heavy
-                    users = self.storage.getUsersInRoom(sensor['room'])
+                    users = self.storage.getUsersInRoom(sensor['buildingId'], sensor['room'])
                     if users is None or not users:
                         emergency = 'intruder'
         return emergency

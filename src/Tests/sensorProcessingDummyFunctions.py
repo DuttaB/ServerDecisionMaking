@@ -93,7 +93,7 @@ def confirmEmergency(emergency, sensor):
     return True
 
 
-def getUsersInRoom(room):
+def getUsersInRoom(buildingId, room):
     '''
     Get our dummy list of users that is initialized in each test
     '''
