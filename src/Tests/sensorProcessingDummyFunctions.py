@@ -107,6 +107,23 @@ def getPosition(sensorID):
     pos = Position(room=sensor['room'], floor=sensor['floor'], x=sensor['xpos'], y=sensor['ypos'])
     return pos
 
+def getSensorsAtLocation(buildingId, room, floor, x, y):
+    '''
+    Just return every list.  Anything calling this will parse through for the proper sensor type
+    '''
+    global weightArr
+    sensor={}
+    sensor['id'] = 'id'
+    sensor['buildingId'] = buildingId
+    sensor['robotId'] = 'robotId'
+    sensor['floor'] = floor
+    sensor['room'] = room
+    sensor['xpos'] = x
+    sensor['ypos'] = y
+    sensor['data'] = weightArr[0]
+    sensor['model'] = 'model'
+    sensor['type'] = 'weight'
+    return [sensor]
 
 def setUpLists():
     global tempArr

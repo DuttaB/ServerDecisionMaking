@@ -25,6 +25,9 @@ class sensorProcessing(object):
         possibly)
 
         If a weight is < 45, it's asumed to be a child or robot.
+
+        As of right now, weight sensor changes will never cause an emergency.
+        The weight sensor will only be read when door sensors change.
         '''
         pass #for now
 
@@ -40,6 +43,8 @@ class sensorProcessing(object):
         elif int(sensor['newData']) > 50:
             smokeSensors = self.storage.getSensorData('smoke',\
                     sensor['buildingId'], sensor['room'])
+            if smokeSensors is None:
+                return None
             for val in smokeSensors.values():
                 if val == '1':
                     emergency = 'fire'
@@ -56,6 +61,8 @@ class sensorProcessing(object):
         if sensor['newData'] == '1':
             tempSensors = self.storage.getSensorData('temperature',\
                     sensor['buildingId'], sensor['room'])
+            if tempSensors is None:
+                return None
             for val in tempSensors.values():
                 if int(val) > 50:
                     emergency = 'fire'
@@ -66,14 +73,34 @@ class sensorProcessing(object):
         '''
         Process the door sensor. Used for intruder detection.  
         '''
-        pass
+        emergency = None
+        if sensor['newData'] == '1':
+            #door sensor went off
+            sensors = self.storage.getSensorsAtLocation(sensor['buildingId'],\
+                    sensor['room'], sensor['floor'], sensor['xpos'],\
+                    sensor['ypos'])
+            assert sensors is not None, "sensors has to at least have a door sensor!"
+            for sensor in sensors:
+                if sensor['type'] == 'weight' and int(sensor['data']) > 80:
+                    #weight sensor heavy
+                    users = self.storage.getUsersInRoom(sensor['room'])
+                    if users is None or not users:
+                        emergency = 'intruder'
+        return emergency
 
     def processGasSensor(self, sensor):
         '''
         If the new data is a 1, create a gas event.  If it's 0, end an existing
         gas event.
         '''
-        pass
+        return 'gas leak' if sensor['newData'] == '1' else None
+
+    def processWaterSensor(self, sensor):
+        '''
+        If < 40 or > 65, return emergency
+        '''
+        newData = int(sensor['newData'])
+        return 'water leak' if newData < 40 or newData > 65 else None
 
 
     #update to us passing a sensor dict object with oldData and newData already 
@@ -116,10 +143,12 @@ class sensorProcessing(object):
             emergency = self.processGasSensor(sensor)
         elif sensorType == 'door':
             emergency = self.processDoorSensor(sensor)
+        elif sensorType == 'water pressure':
+            emergency = self.processWaterSensor(sensor)
         
 
         self.db.shiftHistory(sensorID, newData)
         if emergency is not None:
             trueEmergency = self.checkEmergency.confirmEmergency(emergency, sensor)
-            return 'fire' if trueEmergency else None
+            return emergency if trueEmergency else None
         return None

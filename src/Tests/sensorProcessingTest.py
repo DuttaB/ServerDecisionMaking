@@ -131,7 +131,7 @@ class TestSensorProcessing(unittest.TestCase):
         dummy.addUser('user1')
         self.sensor['id'] = 'weight'
         self.sensor['type'] = 'weight'
-        self.sensor['newData'] = '80'
+        self.sensor['newData'] = '81'
         self.sensor['oldData'] = dummy.getSensorData('weight',\
                 self.sensor['buildingId'], self.sensor['room'])
         self.assertIsNone(self.process.processNewSensorData(self.sensor))
@@ -147,7 +147,7 @@ class TestSensorProcessing(unittest.TestCase):
 
     def test_doorOpenNoIntruder(self):
         dummy.addUser('user1')
-        dummy.shiftHistory('weight','80')
+        dummy.shiftHistory('weight','81')
         self.sensor['id'] = 'door'
         self.sensor['type'] = 'door'
         self.sensor['newData'] = '1'
@@ -165,7 +165,7 @@ class TestSensorProcessing(unittest.TestCase):
         self.assertIsNone(self.process.processNewSensorData(self.sensor))
 
     def test_doorOpenIntruder(self):
-        dummy.shiftHistory('weight','80')
+        dummy.shiftHistory('weight','81')
         self.sensor['id'] = 'door'
         self.sensor['type'] = 'door'
         self.sensor['newData'] = '1'
