@@ -41,6 +41,7 @@ class TestSensorProcessing(unittest.TestCase):
         dummy.shiftHistory('smoke', '1')
         emergency = self.process.processNewSensorData(self.sensor)
         self.assertIsNotNone(emergency)
+        self.assertEquals('fire', emergency)
 
     def test_createNewFireHighHeat(self):
         self.sensor['id'] = 'temp'
@@ -50,6 +51,7 @@ class TestSensorProcessing(unittest.TestCase):
                 self.sensor['buildingId'], self.sensor['room'])
         emergency = self.process.processNewSensorData(self.sensor)
         self.assertIsNotNone(emergency)
+        self.assertEquals('fire', emergency)
 
     def test_createNewFireSmokeChange(self):
         self.sensor['id'] = 'smoke'
@@ -60,7 +62,8 @@ class TestSensorProcessing(unittest.TestCase):
         dummy.shiftHistory('temp', '60')
         emergency = self.process.processNewSensorData(self.sensor)
         self.assertIsNotNone(emergency)
-        
+        self.assertEquals('fire', emergency)
+
     def test_noFireSmoke(self):
         self.sensor['id'] = 'smoke'
         self.sensor['type'] = 'smoke'
@@ -77,6 +80,7 @@ class TestSensorProcessing(unittest.TestCase):
                 self.sensor['buildingId'], self.sensor['room'])
         emergency = self.process.processNewSensorData(self.sensor)
         self.assertIsNotNone(emergency)
+        self.assertEquals('gas leak', emergency)
 
     def test_noGasLeak(self):
         dummy.shiftHistory('gas', '0')
@@ -95,6 +99,7 @@ class TestSensorProcessing(unittest.TestCase):
                 self.sensor['buildingId'], self.sensor['room'])
         emergency = self.process.processNewSensorData(self.sensor)
         self.assertIsNotNone(emergency)
+        self.assertEquals('water leak', emergency)
 
     def test_waterLeakHigh(self):
         self.sensor['id'] = 'water pressure'
@@ -104,6 +109,7 @@ class TestSensorProcessing(unittest.TestCase):
                 self.sensor['buildingId'], self.sensor['room'])
         emergency = self.process.processNewSensorData(self.sensor)
         self.assertIsNotNone(emergency)
+        self.assertEquals('water leak', emergency)
 
     def test_waterNormal(self):
         self.sensor['id'] = 'water pressure'
@@ -167,6 +173,7 @@ class TestSensorProcessing(unittest.TestCase):
                 self.sensor['buildingId'], self.sensor['room'])
         emergency = self.process.processNewSensorData(self.sensor)
         self.assertIsNotNone(emergency)
+        self.assertEquals('intruder', emergency)
 
 
 if __name__ == '__main__':
