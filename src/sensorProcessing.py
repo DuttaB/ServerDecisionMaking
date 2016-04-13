@@ -38,33 +38,37 @@ class sensorProcessing(object):
         if int(sensor['newData']) > 100:
             emergency = 'fire'
         elif int(sensor['newData']) > 50:
-            self.storage.getSensorHistory('smoke')
             smokeSensors = self.storage.getSensorData('smoke',\
                     sensor['buildingId'], sensor['room'])
             for val in smokeSensors.values():
                 if val == '1':
                     emergency = 'fire'
 
-        if emergency is not None:
-            trueEmergency = self.checkEmergency.confirmEmergency('fire', sensor)
-            return 'fire' if trueEmergency else None
-        return None
+        return emergency
 
-    def processSmokeSensor(self, newData):
+    def processSmokeSensor(self, sensor):
         '''
         Process the smoke sensor by reading the temperature sensor history.
         If the smoke sensor, it could be a flaw.  Check the temperature history to
         judge as well.  Only fire if smoke is 1 and temp > 50
         '''
-        pass
+        emergency = None
+        if sensor['newData'] == '1':
+            tempSensors = self.storage.getSensorData('temperature',\
+                    sensor['buildingId'], sensor['room'])
+            for val in tempSensors.values():
+                if int(val) > 50:
+                    emergency = 'fire'
+        return emergency
 
-    def processDoorSensor(self, newData):
+
+    def processDoorSensor(self, sensor):
         '''
         Process the door sensor. Used for intruder detection.  
         '''
         pass
 
-    def processGasSensor(self, newData):
+    def processGasSensor(self, sensor):
         '''
         If the new data is a 1, create a gas event.  If it's 0, end an existing
         gas event.
@@ -104,7 +108,18 @@ class sensorProcessing(object):
         emergency = None
         if sensorType == 'temperature':
             emergency = self.processTempSensor(sensor)
+        elif sensorType == 'smoke':
+            emergency = self.processSmokeSensor(sensor)
+        elif sensorType == 'weight':
+            emergency = self.processWeightSensor(sensor)
+        elif sensorType == 'gas':
+            emergency = self.processGasSensor(sensor)
+        elif sensorType == 'door':
+            emergency = self.processDoorSensor(sensor)
         
 
         self.db.shiftHistory(sensorID, newData)
-        return emergency
+        if emergency is not None:
+            trueEmergency = self.checkEmergency.confirmEmergency(emergency, sensor)
+            return 'fire' if trueEmergency else None
+        return None
