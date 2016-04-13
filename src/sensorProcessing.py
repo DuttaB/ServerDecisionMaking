@@ -72,7 +72,10 @@ def processGasSensor(history, newData):
     pass
 
 
-def processNewSensorData(sensorID, sensorType, newData):
+#update to us passing a sensor dict object with oldData and newData already 
+#filled in.  We'll return a string 'emergency' if there is one.  'emergency'
+#can be something like 'fire' or 'gas'
+def processNewSensorData(sensor):
     '''
     Process new sensor data depending on the sensor type and possibly previous
     sensor data.  This "main" method acts as a switch to route sensor types
@@ -82,6 +85,9 @@ def processNewSensorData(sensorID, sensorType, newData):
     If a new emergency is detected, the emergency is created and returned.
     Otherwise, None is returned.
     '''
+    sensorType = sensor['type']
+    sensorID = sensor['id']
+    nwwData = sensor['newData']
     history = db.getSensorHistory(sensorID)
     # check to see if the data has changed at all
     # Might want to check if status is still set and act accordingly

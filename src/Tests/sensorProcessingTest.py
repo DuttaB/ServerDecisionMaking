@@ -4,30 +4,22 @@ import sys
 sys.path.append('..')
 import sensorProcessing as process
 
-tempArr = [21,20,21,22,21,20,19,18,19,20]
-smokeArr = [0,1,0,1,0]
-gasArr = [0,1,0]
-waterArr = [41,44,46,45,47,45,42,40,42]
-doorArr = [0,1,0,1,0,1,0,1,0]
-weightArr = [0,80, 0,20,85,0,15,0]
+tempArr = []
+smokeArr = []
+gasArr = []
+waterArr = []
+doorArr = []
+weightArr = []
 noneArr = []
-medHighTempArr = [51]
-highTempArr = [101]
-yesSmokeArr = [1]
-yesGasArr = [1]
-lowWaterArr = [20]
-highWaterArr = [70]
-openDoorArr = [1]
-closeDoorArr = [0]
-heavyWeightArr = [100]
-lightWeightArr = [10]
-noWeightArr = [0]
 
 # user list is the list of users for literally whatever we care about
 # the test cases will set this up.  
 # If we want a list of registered users in a room, fill this in
 # If we want to check for intruders, this can be left empty
 userList = []
+
+#The base sensor object
+sensor = {}
 
 def getSensorHistory(sensorID):
     '''
@@ -143,109 +135,167 @@ def getPosition(sensorID):
     Returns a dummy position for the sensor.
     '''
     Position = collections.namedtuple('Position', 'room floor x y')
-    pos = Position(room=2, floor=1, x=20, y=10)
+    pos = Position(room=sensor['room'], floor=sensor['floor'], x=sensor['xpos'], y=sensor['ypos'])
     return pos
 
 class TestSensorProcessing(unittest.TestCase):
     def setUp(self):
-        tempArr = [21,20,21,22,21,20,19,18,19,20]
-        smokeArr = [0,1,0,1,0]
-        gasArr = [0,1,0]
-        waterArr = [41,44,46,45,47,45,42,40,42]
-        doorArr = [0,1,0,1,0,1,0,1,0]
-        weightArr = [0,80, 0,20,85,0,15,0]
+        global tempArr
+        global smokeArr
+        global gasArr
+        global waterArr
+        global doorArr
+        global weightArr
+        global noneArr
+        global userList
+        global sensor
+        tempArr = ['21','20','21','22','21','20','19','18','19','20']
+        smokeArr = ['0','1','0','1','0']
+        gasArr = ['0','1','0']
+        waterArr = ['41','44','46','45','47','45','42','40','42']
+        doorArr = ['0','1','0','1','0','1','0','1','0']
+        weightArr = ['0','80','0','20','85','0','15','0']
         noneArr = []
-        medHighTempArr = [51]
-        highTempArr = [101]
-        yesSmokeArr = [1]
-        yesGasArr = [1]
-        lowWaterArr = [20]
-        highWaterArr = [70]
-        openDoorArr = [1]
-        closeDoorArr = [0]
-        heavyWeightArr = [100]
-        lightWeightArr = [10]
-        noWeightArr = [0]
+        noWeightArr = ['0']
         userList = []
-        
+        sensor['id'] = 'id'
+        sensor['buildingId'] = 'bid'
+        sensor['robotId'] = 'robotId'
+        sensor['floor'] = 0
+        sensor['room'] = 1
+        sensor['xpos'] = 3
+        sensor['ypos'] = 4
+        sensor['data'] = 'data'
+        sensor['model'] = 'model'
+        sensor['type'] = 'type'
+
 
     def test_createNewDataNoHistory(self):
-        self.assertEquals(None, process.processNewSensorData('none', 'none', 0))
+        sensor['id'] = 'none'
+        sensor['type'] = 'none'
+        sensor['newData'] = '0'
+        self.assertEquals(None, process.processNewSensorData(sensor))
 
     def test_createNewFireEventLowHeat(self):
-        smokeArr.insert(0,1) #first elemenet set to 1, indicating smoke
-        emergency = process.processNewSensorData('temp', 'temperature', 60)
+        smokeArr.insert(0,'1') #first elemenet set to 1, indicating smoke
+        sensor['id'] = 'temp'
+        sensor['type'] = 'temperature'
+        sensor['newData'] = '60'
+        sensor['oldData'] = tempArr[0]
+        emergency = process.processNewSensorData(sensor)
         self.assertIsNotNone(emergency)
 
     def test_createNewFireHighHeat(self):
-        emergency = process.processNewSensorData('temp', 'temperature', 101)
+        sensor['id'] = 'temp'
+        sensor['type'] = 'temperature'
+        sensor['newData'] = '101'
+        sensor['oldData'] = tempArr[0]
+        emergency = process.processNewSensorData(sensor)
         self.assertIsNotNone(emergency)
 
     def test_createNewFireSmokeChange(self):
-        tempArr.insert(0,60)
-        emergency = process.processNewSensorData('smoke', 'smoke', 1)
+        tempArr.insert(0,'60')
+        sensor['id'] = 'smoke'
+        sensor['type'] = 'smoke'
+        sensor['newData'] = '1'
+        sensor['oldData'] = smokeArr[0]
+        emergency = process.processNewSensorData(sensor)
         self.assertIsNotNone(emergency)
         
     def test_noFireSmoke(self):
-        self.assertIsNone(process.processNewSensorData('smoke', 'smoke', 1))
+        sensor['id'] = 'smoke'
+        sensor['type'] = 'smoke'
+        sensor['newData'] = '1'
+        sensor['oldData'] = smokeArr[0]
+        self.assertIsNone(process.processNewSensorData(sensor))
 
     def test_gasLeak(self):
-        emergency = process.processNewSensorData('gas', 'gas', 1)
+        sensor['id'] = 'gas'
+        sensor['type'] = 'gas'
+        sensor['newData'] = '1'
+        sensor['oldData'] = gasArr[0]
+        emergency = process.processNewSensorData(sensor)
         self.assertIsNotNone(emergency)
 
     def test_noGasLeak(self):
-        self.assertIsNone(process.processNewSensorData('gas','gas',0))
+        tempArr.insert(0,'1')
+        sensor['id'] = 'gas'
+        sensor['type'] = 'gas'
+        sensor['newData'] = '0'
+        sensor['oldData'] = gasArr[0]
+        self.assertIsNone(process.processNewSensorData(sensor))
 
     def test_waterLeakLow(self):
-        emergency = process.processNewSensorData('water pressure', 'water pressure', 10)
+        sensor['id'] = 'water pressure'
+        sensor['type'] = 'water pressure'
+        sensor['newData'] = '10'
+        sensor['oldData'] = waterArr[0]
+        emergency = process.processNewSensorData(sensor)
         self.assertIsNotNone(emergency)
 
     def test_waterLeakHigh(self):
-        emergency = process.processNewSensorData('water pressure', 'water pressure', 80)
+        sensor['id'] = 'water pressure'
+        sensor['type'] = 'water pressure'
+        sensor['newData'] = '80'
+        sensor['oldData'] = waterArr[0]
+        emergency = process.processNewSensorData(sensor)
         self.assertIsNotNone(emergency)
 
     def test_waterNormal(self):
-        self.assertIsNone(process.processNewSensorData('water pressure', 'water pressure', 45))
+        sensor['id'] = 'water pressure'
+        sensor['type'] = 'water pressure'
+        sensor['newData'] = '45'
+        sensor['oldData'] = waterArr[0]
+        self.assertIsNone(process.processNewSensorData(sensor))
 
     def test_lowWeightNoIntruder(self):
-        self.assertIsNone(process.processNewSensorData('weight', 'weight', 44))
+        sensor['id'] = 'weight'
+        sensor['type'] = 'weight'
+        sensor['newData'] = '44'
+        sensor['oldData'] = weightArr[0]
+        self.assertIsNone(process.processNewSensorData(sensor))
 
     def test_highWeightNoIntruder(self):
         userList.insert(0,'user1')
-        self.assertIsNone(process.processNewSensorData('weight', 'weight', 80))
-
-    def test_highWeightIntruder(self):
-        emergency = process.processNewSensorData('weight', 'weight', 80)
-        self.assertIsNotNone(emergency)
+        sensor['id'] = 'weight'
+        sensor['type'] = 'weight'
+        sensor['newData'] = '80'
+        sensor['oldData'] = weightArr[0]
+        self.assertIsNone(process.processNewSensorData(sensor))
 
     def test_doorClosed(self):
-        self.assertIsNone(process.processNewSensorData('door','door', 0))
+        doorArr.insert(0,'1')
+        sensor['id'] = 'door'
+        sensor['type'] = 'door'
+        sensor['newData'] = '0'
+        sensor['oldData'] = doorArr[0]
+        self.assertIsNone(process.processNewSensorData(sensor))
 
     def test_doorOpenNoIntruder(self):
         userList.insert(0,'user1')
         weightArr.insert(0,80)
-        self.assertIsNone(process.processNewSensorData('door', 'door', 1))
+        sensor['id'] = 'door'
+        sensor['type'] = 'door'
+        sensor['newData'] = '1'
+        sensor['oldData'] = doorArr[0]
+        self.assertIsNone(process.processNewSensorData(sensor))
 
     def test_doorOpenNoIntruderChild(self):
         weightArr.insert(0,40)
-        self.assertIsNone(process.processNewSensorData('door', 'door', 1))
+        sensor['id'] = 'door'
+        sensor['type'] = 'door'
+        sensor['newData'] = '1'
+        sensor['oldData'] = doorArr[0]
+        self.assertIsNone(process.processNewSensorData(sensor))
 
     def test_doorOpenIntruder(self):
         weightArr.insert(0,80)
-        emergency = process.processNewSensorData('door', 'door', 1)
+        sensor['id'] = 'door'
+        sensor['type'] = 'door'
+        sensor['newData'] = '1'
+        sensor['oldData'] = doorArr[0]
+        emergency = process.processNewSensorData(sensor)
         self.assertIsNotNone(emergency)
-
-    def test_createEmergency(self):
-        emergency = process.createEmergency('fire', 'fire', 10)
-        #We know what the dummy values are so just check that they get returned
-        self.assertIsNotNone(emergency)
-        self.assertEquals('fire', emergency['msg type'])
-        self.assertEquals(2, emergency['body']['room'])
-        self.assertEquals(1, emergency['body']['floor'])
-        self.assertEquals(20, emergency['body']['xpos'])
-        self.assertEquals(10, emergency['body']['ypos'])
-        self.assertEquals(10, emergency['body']['severity'])
-
 
 
 if __name__ == '__main__':
