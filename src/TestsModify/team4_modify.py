@@ -18,7 +18,7 @@ This function parses a sensor object, and determines if something
 has changed. If it has, it returns a dictionary contaning all 
 pertinent information to be sent in a message to whoever requires it.
 '''
-def parseSensor(old,new,eventName):
+def parseSensor(old,new,eventName):	
     if old['data']['S'] == new['data']['S']:
     #if it's the same nothing has changed
         print("0")
@@ -26,17 +26,22 @@ def parseSensor(old,new,eventName):
     else:
     #if it has changed there must be a problem
         emergency = {
-                        "type": new['data']['S'],
+                        "type": new['type']['S'],
                         "buildingId": new['buildingId']['S'],
                         "room": new['room']['N'],
                         "from": "sensor",
                         "xpos": new['xpos']['N'],
                         "ypos": new['ypos']['N'],
-                        "floor": new['floor']['N']
+                        "floor": new['floor']['N'],
+			"id": new['id']['S'],
+			"oldData": old['data']['S'],
+			"newData": new['data']['S']
                     }
         if "robotId" in new:
             emergency['robotId'] = new['robotId']['S']
-        return sensorProcessing.processNewSensorData(emergency)
+			
+	sens = sensorProcessing(emergency)
+        return sens.processNewSensorData(emergency)
 
 '''
 Generates a POST request to the push notification team that sends a message
@@ -360,7 +365,7 @@ def getSensorData(sensor_type, buildingId, room):
             }
     """
     try:
-        conn = http.client.HTTPConnection('localhost:8080')
+        conn = httplib.HTTPConnection('localhost:8080')
         conn.request('GET', '/api/buildings/' + buildingId + '/sensors/', headers={})
         sensors = json.loads(conn.getresponse().read().decode('utf-8'))
         sensorData = {}
@@ -512,8 +517,7 @@ class sensorProcessing(object):
         elif sensorType == 'door':
             emergency = self.processDoorSensor(sensor)
         elif sensorType == 'water pressure':
-            emergency = self.processWaterSensor(sensor)
-        
+            emergency = self.processWaterSensor(sensor)        
 
         self.db.shiftHistory(sensorID, newData)
         if emergency is not None:
