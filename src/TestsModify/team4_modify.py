@@ -302,9 +302,7 @@ def confirmEmergency(emergency):
             return True
         else:
             return False
-
-
-
+            
     elif(msgType=="Intruder"):
         weightSensorsArray=getSensors(buildingID,room,"Weight")
         weightSensorsCount=0
