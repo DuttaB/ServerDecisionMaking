@@ -3,7 +3,7 @@ This is the automatic test for function getSensorData(sensor_type, buildingId, r
 Chang Sun, 4/11/2016
 """
 
-import http.client
+import httplib
 import json
 import unittest
 from getSensorData import *
@@ -20,7 +20,7 @@ NUM_ROOMS_OF_BUILDING = [3, 2]
 
 # ________________________________________________________________
 
-conn = http.client.HTTPConnection('localhost:8080')
+conn = httplib.HTTPConnection('localhost:8080')
 buildingIds = []
 sensorIds = {}
 
