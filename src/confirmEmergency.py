@@ -1,73 +1,84 @@
-import json
-#This method will return sensor ids and data of the sensors of specific type present in the given building and room
-#currently some dummy code
-def getSensors(buildingID, room, sensorType):
-    if(buildingID==1 and room==2):
-        return ["a123","b123"]
-    else:
-        return ["d123"]
-#These methods will check if the data of a particular sensor indicates that there is Fire.
-#For example, the method will return true if temperature of temperature sensor is greater than 50. currently dummy code
-def ifFireTemperature(tempSensor):
-    if(tempSensor=="a123" or tempSensor=="b123"):
+from getSensorData import getSensorData
+def confirmFireEmergency(sensor):
+    #get all temperature sensors in the same building,room as the given sensor
+    tempSensors=getSensorData(sensor['type'],sensor['buildingId'],int(sensor['room']))
+    tempCount=0
+    #if more than 2 temperature sensors then atleast 2 should be greater than 50
+    if(len(tempSensors)>2):
+        for key,value in tempSensors.items():
+            if(int(value)>50):
+                tempCount=tempCount+1
+        if(tempCount<2):
+            return False
+    #get all smoke sensors in that building,room
+    #if more than 2 smoke sensors then atleast 2 should be 1
+    smokeSensors=getSensorData('smoke',sensor['buildingId'],sensor['room'])
+    smokeCount=0
+    if(len(smokeSensors)>2):
+        for key,value in smokeSensors.items():
+            if(int(value)==1):
+                smokeCount=smokeCount+1
+        if(smokeCount<2):
+            return False
+    return True
+    
+def confirmIntruderEmergency(sensor):
+    #get all weight sensors in the same building,room as the given sensor
+    weightSensors=getSensorData('weight',sensor['buildingId'],int(sensor['room']))
+    weightCount=0;
+    #get all users in the same building,room as the given sensor
+    users = self.storage.getUsersInRoom(sensor['buildingId'], sensor['room'])
+    #if number of weight sensors which are greater than 80 is greater than number of users in the room, return true
+    for key,value in weightSensors.items():
+            if(int(value)>80):
+                weightCount=weightCount+1
+    if(weightCount>len(users)):
         return True
     else:
         return False
-
-def ifFireSmoke(smokeSensor):
-    return True
-
-#If weight>50 then there is an intruder. right now, always False.
-def isIntruder(weightSensor):
-    return False
-#This method will receive the emergency object as the input and confirm if the emergency is real by checking other sensors in the same location
-def confirmEmergency(emergency):
-#Get the type of emergency and the details such as room number
-    msgType=emergency['msg_type']
-    buildingID=emergency['body']['buildingID']
-    room=emergency['body']['room']
-
-
-#Based upon the type of emergency, get the respective sensors in that room
-    if(msgType=="Fire"):
-        smokeSensorsArray=getSensors(buildingID, room,"Smoke")
-        tempSensorsArray=getSensors(buildingID, room,"Temperature")
-        smokeCount=0
-        tempCount=0
-        for smokeSensor in smokeSensorsArray:
-            if(ifFireSmoke(smokeSensor)):
-                smokeCount=smokeCount+1
-
-        for tempSensor in tempSensorsArray:
-            if(ifFireTemperature(tempSensor)):
-                tempCount=tempCount+1
-#If more than half of the smoke and temperature sensors detect that there is fire then fire emergency is confirmed
-        if((smokeCount>len(smokeSensorsArray)/2) & (tempCount>len(tempSensorsArray)/2)):
+    
+def confirmGasLeakEmergency (sensor): 
+    #get all gas sensors in the same building,room as the given sensor
+    gasSensors=getSensorData(sensor['type'],sensor['buildingId'],int(sensor['room'])) 
+    #if more than 2 gas sensors then return true if atleast 2 of them are 1
+    if(len(gasSensors)<=2):
+        return True
+    else:
+        gasCount=0
+        for key,value in gasSensors.items():
+            if(int(value)==1):
+                gasCount=gasCount+1
+        if(gasCount>=2):
             return True
         else:
-            return False
-
-
-
-    elif(msgType=="Intruder"):
-        weightSensorsArray=getSensors(buildingID,room,"Weight")
-        weightSensorsCount=0
-        for weightSensor in weightSensorsArray:
-            if(isIntruder(weightSensor)):
-                weightSensorsCount=weightSensorsCount+1
-#If more than half of the weight sensors detect that there is an intruder then intruder emergency is confirmed
-        if(weightSensorsCount>len(weightSensorsArray)/2):
+            return False 
+        
+def confirmWaterLeakEmergency (sensor): 
+    #get all water pressure sensors in the same building,room as the given sensor
+    waterSensors=getSensorData(sensor['type'],sensor['buildingId'],int(sensor['room'])) 
+    #if more than 2 water pressure sensors then return true if atleast 2 of them satisfy the water leak criteria
+    if(len(waterSensors)<=2):
+        return True
+    else:
+        waterCount=0
+        for key,value in waterSensors.items():
+            if(int(value) <40 or int(value) >60):
+                waterCount=waterCount+1
+        if(waterCount>=2):
             return True
         else:
-            return False
-
-
-
-
-'''if __name__ == '__main__':
-    string='{"msg_type": "Intruder","body":{"buildingID":2,"room": 2, "floor": 2, "severity": 1}}'
-
-    emergency= json.loads(string)
-    this = confirmEmergency(emergency)
-    print(this)
-    '''
+            return False           
+        
+    
+def confirmEmergency(emergency, sensor):
+    #calling respective method based on type of emergency
+    if(emergency=='fire'):
+        return confirmFireEmergency(sensor)
+    elif(emergency=='intruder'):
+        return confirmIntruderEmergency(sensor)
+    elif(emergency=='gas leak'):
+        return confirmGasLeakEmergency(sensor)
+    elif(emergency=='water leak'):
+        return confirmWaterLeakEmergency(sensor)
+    else:
+        return False
