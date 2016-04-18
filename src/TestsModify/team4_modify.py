@@ -40,7 +40,7 @@ def parseSensor(old,new,eventName):
         if "robotId" in new:
             emergency['robotId'] = new['robotId']['S']
 			
-	sens = sensorProcessing(emergency)
+	sens = sensorProcessing()
         return sens.processNewSensorData(emergency)
 
 '''
