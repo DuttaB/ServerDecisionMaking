@@ -1,21 +1,23 @@
-# This import will change when we don't do dummy processing anymore
-#import sensorProcessingTest as db
-#import sensorProcessingTest as storage
-#import sensorProcessingTest as checkEmergency
-
 
 class sensorProcessing(object):
     def __init__(self, module=None):
         if not module:
-            pass #will import other modules here to call functions
-            #import getSensorData as storage 
+            import getUsersInRoom as getUsers
+            import getSensorsAtLocation as getSensors
+            import getSensorData as getSensorData
+            import confirmEmergency as checkEmergency
+            db = None
         else:
-            storage = module
-            db = module
+            getUsers = module
+            getSensors = module
+            getSensorData = module
             checkEmergency = module
-        self.storage = storage
-        self.db = db
+            db = module
+        self.getUsers = getUsers
+        self.getSensors = getSensors
+        self.getSensorData = getSensorData
         self.checkEmergency = checkEmergency
+        self.db = db
         
     def processWeightSensor(self, sensor):
         '''
@@ -41,7 +43,7 @@ class sensorProcessing(object):
         if int(sensor['newData']) > 100:
             emergency = 'fire'
         elif int(sensor['newData']) > 50:
-            smokeSensors = self.storage.getSensorData('smoke',\
+            smokeSensors = self.getSensorData.getSensorData('smoke',\
                     sensor['buildingId'], sensor['room'])
             if smokeSensors is None:
                 return None
@@ -59,7 +61,7 @@ class sensorProcessing(object):
         '''
         emergency = None
         if sensor['newData'] == '1':
-            tempSensors = self.storage.getSensorData('temperature',\
+            tempSensors = self.getSensorData.getSensorData('temperature',\
                     sensor['buildingId'], sensor['room'])
             if tempSensors is None:
                 return None
@@ -76,14 +78,14 @@ class sensorProcessing(object):
         emergency = None
         if sensor['newData'] == '1':
             #door sensor went off
-            sensors = self.storage.getSensorsAtLocation(sensor['buildingId'],\
+            sensors = self.getSensors.getSensorsAtLocation(sensor['buildingId'],\
                     sensor['room'], sensor['floor'], sensor['xpos'],\
                     sensor['ypos'])
             assert sensors is not None, "sensors has to at least have a door sensor!"
             for sensor in sensors:
                 if sensor['type'] == 'weight' and int(sensor['data']) > 80:
                     #weight sensor heavy
-                    users = self.storage.getUsersInRoom(sensor['buildingId'], sensor['room'])
+                    users = self.getUsers.getUsersInRoom(sensor['buildingId'], sensor['room'])
                     if users is None or not users:
                         emergency = 'intruder'
         return emergency
@@ -147,7 +149,9 @@ class sensorProcessing(object):
             emergency = self.processWaterSensor(sensor)
         
 
-        self.db.shiftHistory(sensorID, newData)
+        if self.db is not None:
+            self.db.shiftHistory(sensorID, newData)
+
         if emergency is not None:
             trueEmergency = self.checkEmergency.confirmEmergency(emergency, sensor)
             return emergency if trueEmergency else None
