@@ -164,6 +164,15 @@ class testConfirmEmergency(unittest.TestCase):
         self.assertEqual(False,confirmEmergency('water leak',self.sensor), "False water Leak Emergency")
         sensorIds=[]
 
+    def test_intruderEvent(self):
+        global sensorIds
+        self.sensor['buildingId']=building_id
+        self.sensor['room']='1'
+        self.sensor['floor']='2'
+        self.sensor['xpos']=2
+        self.sensor['ypos']=3
+        self.assertEqual(True,confirmEmergency('intruder',self.sensor), "False Intruder Emergency")
+
 
 if __name__ == '__main__':
     unittest.main()	

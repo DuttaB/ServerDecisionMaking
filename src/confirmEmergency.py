@@ -1,4 +1,9 @@
+#from checkIntruder import checkIntruder
 from getSensorData import getSensorData
+
+# dummy function for checkIntruder. this will be replaced by actual checkIntruder once it is imported
+def checkIntruder(building_id, floor_id, room_id, xpos_id, ypos_id):
+    return True
 def confirmFireEmergency(sensor):
     #get all temperature sensors in the same building,room as the given sensor
     tempSensors=getSensorData(sensor['type'],sensor['buildingId'],int(sensor['room']))
@@ -24,18 +29,7 @@ def confirmFireEmergency(sensor):
     
 def confirmIntruderEmergency(sensor):
     #get all weight sensors in the same building,room as the given sensor
-    weightSensors=getSensorData('weight',sensor['buildingId'],int(sensor['room']))
-    weightCount=0;
-    #get all users in the same building,room as the given sensor
-    users = self.storage.getUsersInRoom(sensor['buildingId'], sensor['room'])
-    #if number of weight sensors which are greater than 80 is greater than number of users in the room, return true
-    for key,value in weightSensors.items():
-            if(int(value)>80):
-                weightCount=weightCount+1
-    if(weightCount>len(users)):
-        return True
-    else:
-        return False
+    return checkIntruder(sensor['buildingId'],sensor['floor'],sensor['room'],sensor['xpos'],sensor['ypos'])
     
 def confirmGasLeakEmergency (sensor): 
     #get all gas sensors in the same building,room as the given sensor

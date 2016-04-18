@@ -18,18 +18,25 @@ def checkIntruder(building_id, floor_id, room_id, xpos_id, ypos_id):
         data = res.read()
         people = json.loads(data)
         uid = 9999; #some junk value
+        print "checkIntruder(): Need to look for intruder at building, floor, room, xpos, ypos: %s %d %d %d %d" %(building_id, floor_id, room_id, xpos_id, ypos_id)
+        
         for person in people:
-            building = person["buildingID"]
+            building = person["buildingId"]
             floor = person["floor"]
             room = person["room"]
             xpos = person["xpos"]
             ypos = person["ypos"]
-            if(building == building_id and floor == floor_id and xpos == xpos_id and ypos == ypos_id):
+            print "checkIntruder(): Intruder Comparison for, building, floor, room, xpos, ypos: %s %d %d %d %d" %(building, floor, room, xpos, ypos)            
+            if(building == building_id and floor == floor_id and room == room_id and xpos == xpos_id and ypos == ypos_id):
                 uid = person["id"]
-        if id == 9999:
-            return True;
-        else:
+                #print"MATCH %d %d" %(uid, person["id"])
+
+        if uid != 9999:
+            print"NOT FOUND intruder in the given location!!!"
             return False;
+        else:
+            print"FOUND intruder in the given location!!!"
+            return True;
     except Exception as e:
        print('Error in checkIntruder: ', e)
     return None
