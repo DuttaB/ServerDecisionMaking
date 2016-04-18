@@ -42,7 +42,7 @@ def getSensorsAtLocation(buildingId, room, floor, x, y):
         sensors = []
         for sensor in allSensors:
             if sensor['room'] == room and sensor['floor'] == floor \
-                    and sensor['x'] == x and sensor['y'] == y:
+                    and sensor['xpos'] == x and sensor['ypos'] == y:
                 sensors.append(sensor)
         return sensors
     except Exception as e:
