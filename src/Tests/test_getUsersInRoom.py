@@ -94,6 +94,7 @@ class TestGetUsersInRoom(unittest.TestCase):
                 self.assertEqual(len(users), len(usersInBuilding[x][room]))
                 for user in users:
                     self.assertEqual(True, user in usersInBuilding[x][room])
+            self.assertEqual([], getUsersInRoom(buildingIds[x], NUM_ROOMS_OF_BUILDING[x]))
         print('******Finished running test cases******')
 
 # ________________________________________________________________
