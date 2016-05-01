@@ -2,28 +2,22 @@ from __future__ import print_function
 import json
 import httplib
 import time
+from sensorProcessing import sensorProcessing
 
 def lambda_handler(event, context):
     for record in event['Records']:
         temp = record['dynamodb']
-        print(record['eventName'], "EventName")
         if record['eventName'] == 'MODIFY':
             if record['eventSourceARN'].find("sensors") >= 0:
                 message = (parseSensor(temp['OldImage'], temp['NewImage'], record['eventName']))
                 if message:
                     if message['type'] != "ok":
                         emergencyLogic(message)
-            elif record['eventSourceARN'].find("users") >= 0:
-                message = (parseUser(temp['OldImage'], temp['NewImage'], record['eventName']))
-                print(message)
-                if message:
-                    processUserMessage(message)
                 
         elif record['eventName'] == "INSERT":
-            print(record['eventSourceARN'])
             if record['eventSourceARN'].find("sensors") >= 0:
                 message = (parseSensor(0, temp['NewImage'], record['eventName']))
-            elif record['eventSourceARN'].find("User") >= 0:
+            elif record['eventSourceARN'].find("user") >= 0:
                 message = (parseUser(0, temp['NewImage'], record['eventName']))
             elif record['eventSourceARN'].find("robots") >= 0:
                 message = parseRobot(temp['NewImage'])
@@ -51,21 +45,29 @@ def parseSensor(old,new,eventName):
         return emergency
     elif old['data']['S'] == new['data']['S']:
     #if it's the same nothing has changed
-        return 0
+        return None
     else:
-    #if it has changed there must be a problem
         emergency = {
-                        "type": new['data']['S'],
+                        "type": new['type']['S'],
                         "buildingId": new['buildingId']['S'],
                         "room": new['room']['N'],
                         "from": "sensor",
                         "xpos": new['xpos']['N'],
                         "ypos": new['ypos']['N'],
-                        "floor": new['floor']['N']
+                        "floor": new['floor']['N'],
+			"id": new['id']['S'],
+			"oldData": old['data']['S'],
+			"newData": new['data']['S']
                     }
         if "robotId" in new:
             emergency['robotId'] = new['robotId']['S']
-        return emergency
+			
+        bad_stuff = sensorProcessing.processNewSensorData(emergency)
+        #code is dumb.  Do this because it's what's expected later
+        if bad_stuff is not None:
+            emergency['type'] = bad_stuff
+            return emergency
+        return None
 
 '''
 This function parses a user object, and determines if something
@@ -76,7 +78,6 @@ def parseUser(old, new, eventName):
     if eventName == "INSERT":
         
         
-        print(new, "new here")
         #if it is a new sensor
         emergency = {
                         "from": "new user",

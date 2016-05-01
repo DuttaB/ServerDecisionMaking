@@ -1,3 +1,5 @@
 *.pyc
 Tests/*.pyc
 TestsModify/*.pyc
+Tests/.coverage
+Tests/htmlcov/
