@@ -1,5 +1,11 @@
 
 class sensorProcessing(object):
+    getUsers = None
+    getSensors = None
+    getSensorData = None
+    checkEmergency = None
+    db = None
+
     def __init__(self, module=None):
         if not module:
             import getUsersInRoom as getUsers
@@ -13,11 +19,16 @@ class sensorProcessing(object):
             getSensorData = module
             checkEmergency = module
             db = module
-        self.getUsers = getUsers
-        self.getSensors = getSensors
-        self.getSensorData = getSensorData
-        self.checkEmergency = checkEmergency
-        self.db = db
+        if not self.getUsers:
+            self.getUsers = getUsers
+        if not self.getSensors:
+            self.getSensors = getSensors
+        if not self.getSensorData:
+            self.getSensorData = getSensorData
+        if not self.checkEmergency:
+            self.checkEmergency = checkEmergency
+        if not self.db:
+            self.db = db
         
     def processWeightSensor(self, sensor):
         '''
@@ -45,6 +56,9 @@ class sensorProcessing(object):
         elif int(sensor['newData']) > 50:
             smokeSensors = self.getSensorData.getSensorData('smoke',\
                     sensor['buildingId'], sensor['room'])
+            print "smoke sensors"
+            print self.getSensorData.getSensorData()
+            print self.checkEmergency.confirmEmergency()
             if smokeSensors is None:
                 return None
             for val in smokeSensors.values():

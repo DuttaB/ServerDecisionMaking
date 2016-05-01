@@ -5,6 +5,7 @@ import time
 from sensorProcessing import sensorProcessing
 
 def lambda_handler(event, context):
+    
     for record in event['Records']:
         temp = record['dynamodb']
         if record['eventName'] == 'MODIFY':
@@ -61,8 +62,8 @@ def parseSensor(old,new,eventName):
                     }
         if "robotId" in new:
             emergency['robotId'] = new['robotId']['S']
-			
-        bad_stuff = sensorProcessing.processNewSensorData(emergency)
+	process = sensorProcessing()
+        bad_stuff = process.processNewSensorData(emergency)
         #code is dumb.  Do this because it's what's expected later
         if bad_stuff is not None:
             emergency['type'] = bad_stuff
