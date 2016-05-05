@@ -69,6 +69,23 @@ def shiftHistory(sensorID, newData):
     if sensorID == 'none':
         noneArr.insert(0,newData)
 
+def shiftLastDataHistory(sensorID, newData):
+    global tempArrLast
+    global smokeArrLast
+    global gasArrLast
+    global waterArrLast
+    global weightArrLast
+    if sensorID == 'temp':
+        tempArrLast.insert(0,newData)
+    if sensorID == 'smoke':
+        smokeArrLast.insert(0, newData)
+    if sensorID == 'gas':
+        gasArrLast.insert(0,newData)
+    if sensorID == 'water pressure':
+        waterArrLast.insert(0,newData)
+    if sensorID == 'weight':
+        weightArrLast.insert(0,newData)
+
 def getSensorData(sensorType, buildingID, room):
     global tempArr
     global smokeArr
@@ -89,11 +106,28 @@ def getSensorData(sensorType, buildingID, room):
         sensors['water pressure id'] = waterArr[0]
     return sensors
 
+def get_last_states(sensorId,size=1):
+    global tempArrLast
+    global smokeArrLast
+    global gasArrLast
+    global waterArrLast
+    global weightArrLast
+    if sensorId == 'weight':
+        return [('', weightArrLast[0])]#'85'
+    if sensorId == 'temp':
+        return [('',tempArrLast[0])]#'40'
+    if sensorId == 'water pressure':
+        return [('', waterArrLast[0])]#'60'
+    if sensorId == 'gas':
+        return [('', gasArrLast[0])]#'0'
+    if sensorId == 'smoke':
+        return [('', smokeArrLast[0])]#'0'
+
 def confirmEmergency(emergency, sensor):
     return True
 
 
-def getUsersInRoom(buildingId, room):
+def getUsersAtLocation(buildingId, room, floor, xpos, ypos):
     '''
     Get our dummy list of users that is initialized in each test
     '''
@@ -112,8 +146,10 @@ def getSensorsAtLocation(buildingId, room, floor, x, y):
     Just return every list.  Anything calling this will parse through for the proper sensor type
     '''
     global weightArr
+    global proximityArr
+    sensors=[]
     sensor={}
-    sensor['id'] = 'id'
+    sensor['id'] = 'weight'
     sensor['buildingId'] = buildingId
     sensor['robotId'] = 'robotId'
     sensor['floor'] = floor
@@ -123,7 +159,22 @@ def getSensorsAtLocation(buildingId, room, floor, x, y):
     sensor['data'] = weightArr[0]
     sensor['model'] = 'model'
     sensor['type'] = 'weight'
-    return [sensor]
+    sensors.append(sensor)
+
+    sensor1={}
+    sensor1['id'] = 'proximity'
+    sensor1['buildingId'] = buildingId
+    sensor1['robotId'] = 'robotId'
+    sensor1['floor'] = floor
+    sensor1['room'] = room
+    sensor1['xpos'] = x
+    sensor1['ypos'] = y
+    sensor1['data'] = '1'
+    sensor1['model'] = 'model'
+    sensor1['type'] = 'proximity'
+    sensors.append(sensor1)
+
+    return sensors
 
 def setUpLists():
     global tempArr
@@ -134,6 +185,14 @@ def setUpLists():
     global weightArr
     global noneArr
     global userList
+    global proximityArr
+
+    global tempArrLast
+    global smokeArrLast
+    global gasArrLast
+    global waterArrLast
+    global weightArrLast
+
     tempArr = ['21','20','21','22','21','20','19','18','19','20']
     smokeArr = ['0','1','0','1','0']
     gasArr = ['0','1','0']
@@ -142,7 +201,17 @@ def setUpLists():
     weightArr = ['0','80','0','20','85','0','15','0']
     noneArr = []
     noWeightArr = ['0']
+    proximityArr = ['1']
     userList = []
 
-def addUser(userId):
+    tempArrLast = ['40']
+    weightArrLast = ['85']
+    waterArrLast = ['60']
+    gasArrLast = ['0']
+    smokeArrLast = ['0']
+
+def addUserInPosition(userId):
     userList.insert(0,userId)
+
+def addUser(userId):
+    pass
