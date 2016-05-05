@@ -10,6 +10,7 @@ Description: Implements the various functions for storing states
 # _________________________________________________________________________________________________
 
 
+import sys
 import datetime
 import pytz
 from pynamodb.models import Model
@@ -52,7 +53,7 @@ def create_state_table():
 # _________________________________________________________________________________________________
 
 
-def get_all_states(objectId):
+def get_all_states(objectId, out=sys.stdout):
     """
     Queries the States table for all attribute values of entity with objectId.
     Returns a list of dict, where each dict is in the following format:
@@ -74,7 +75,7 @@ def get_all_states(objectId):
         items.reverse()
         return items
     except Exception:
-        print("Error: States table does not exist.")
+        out.write('Error: States table does not exist.\n')
         return []
 
 def get_last_states(objectId, size=1):
@@ -98,7 +99,7 @@ def get_last_states(objectId, size=1):
             for x in range(size if size <= len(history) else len(history))]
 
 
-def store_state(objectId, state, tstamp=datetime.datetime.now()):
+def store_state(objectId, state, tstamp=datetime.datetime.now(), out=sys.stdout):
     """
     Stores the new state for entity with objectId.
     The default time stamp is the time when this function is invoked.
@@ -121,10 +122,10 @@ def store_state(objectId, state, tstamp=datetime.datetime.now()):
     history = get_all_states(objectId)
     # error check: new state has to happen later than the previous state
     if len(history) > 0 and history[0]['tstamp'] >= tstamp:
-        print("Error: New state has to happen later than previous state.")
+        out.write('Error: New state has to happen later than previous state.\n')
         return
     # remove legacy history
-    if len(history) > MAX_HISTORY_SIZE:
+    if len(history) >= MAX_HISTORY_SIZE:
         for item in State.query(objectId):
             item.delete()
             break
@@ -132,7 +133,7 @@ def store_state(objectId, state, tstamp=datetime.datetime.now()):
         new_obj = State(objectId=objectId, tstamp=tstamp, state=state)
         new_obj.save()
     except Exception:
-        print("Error: States table does not exist.")
+        out.write('Error: States table does not exist.\n')
         return
 
 # _________________________________________________________________________________________________
