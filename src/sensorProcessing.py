@@ -13,7 +13,7 @@ class sensorProcessing(object):
             import getSensorsAtLocation as getSensors
             import getSensorData as getSensorData
             import confirmEmergency as checkEmergency
-            import get_last_states as get_last_states
+            import server_storage as get_last_states
             db = None
         else:
             getUsers = module
@@ -196,7 +196,7 @@ class sensorProcessing(object):
             elif sensorType == 'water pressure':
                 emergency = self.processWaterSensor(sensor)
         
-
+            self.get_last_states.store_state(sensorID,newData)
             if self.db is not None:
                 self.db.shiftHistory(sensorID, newData)
 
