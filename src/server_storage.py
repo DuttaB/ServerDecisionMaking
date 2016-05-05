@@ -69,10 +69,13 @@ def get_all_states(objectId):
     Usage examples:
         history = get_all_states(id)
     """
-    items = [item.attribute_values for item in State.query(objectId)]
-    items.reverse()
-    return items
-
+    try:
+        items = [item.attribute_values for item in State.query(objectId)]
+        items.reverse()
+        return items
+    except Exception:
+        print("Error: States table does not exist.")
+        return []
 
 def get_last_states(objectId, size=1):
     """
@@ -125,8 +128,11 @@ def store_state(objectId, state, tstamp=datetime.datetime.now()):
         for item in State.query(objectId):
             item.delete()
             break
-    new_obj = State(objectId=objectId, tstamp=tstamp, state=state)
-    new_obj.save()
-
+    try:
+        new_obj = State(objectId=objectId, tstamp=tstamp, state=state)
+        new_obj.save()
+    except Exception:
+        print("Error: States table does not exist.")
+        return
 
 # _________________________________________________________________________________________________
