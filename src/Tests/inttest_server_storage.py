@@ -106,6 +106,9 @@ def generate_lambda_event(new_status, id, test_type, old_status='fire'):
     return json.loads(json_str)
 
 
+# _________________________________________________________________________________________________
+
+
 class IntTestServerStorage(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
