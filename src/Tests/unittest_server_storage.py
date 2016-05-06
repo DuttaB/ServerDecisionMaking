@@ -44,7 +44,7 @@ class UnitTestServerStorage(unittest.TestCase):
         print('Case 2: Check normal operation')
         size1 = 6
         for i in range(size1):
-            store_state(id1, i, times[i])
+            store_state(id1, str(i), times[i])
         history1 = get_last_states(id1, size=size1)
         self.assertEqual(size1, len(history1))
         for i in range(1, len(history1)):
@@ -54,7 +54,7 @@ class UnitTestServerStorage(unittest.TestCase):
         print('Case 3: Check size > MAX_HISTORY_COUNT')
         size2 = MAX_HISTORY_SIZE + 1
         for i in range(size2):
-            store_state(id2, i, times[i])
+            store_state(id2, str(i), times[i])
         history2 = get_last_states(id2, size=size2)
         self.assertEqual(MAX_HISTORY_SIZE, len(history2))
         for i in range(1, len(history2)):
@@ -65,8 +65,8 @@ class UnitTestServerStorage(unittest.TestCase):
         earlier = times[0]
         later = times[1]
         out = StringIO()
-        store_state(id3, 0, tstamp=earlier, out=out)
-        store_state(id3, 0, tstamp=later, out=out)
+        store_state(id3, '0', tstamp=earlier, out=out)
+        store_state(id3, '0', tstamp=later, out=out)
         output = out.getvalue().strip()
         self.assertEqual(output, '')
 
@@ -74,8 +74,8 @@ class UnitTestServerStorage(unittest.TestCase):
         print('Case 5: Check current state time stamp earlier than previous state')
         earlier = times[2]
         later = times[3]
-        store_state(id3, 0, tstamp=later, out=out)
-        store_state(id3, 0, tstamp=earlier, out=out)
+        store_state(id3, '0', tstamp=later, out=out)
+        store_state(id3, '0', tstamp=earlier, out=out)
         output = out.getvalue().strip()
         self.assertEqual(output, 'Error: New state has to happen later than previous state.')
 

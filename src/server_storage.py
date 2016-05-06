@@ -34,7 +34,7 @@ class State(Model):
         table_name = 'States'
     objectId = UnicodeAttribute(hash_key=True)
     tstamp = UTCDateTimeAttribute(range_key=True)
-    state = NumberAttribute(default=0)
+    state = UnicodeAttribute(default='')
 
 
 def create_state_table():

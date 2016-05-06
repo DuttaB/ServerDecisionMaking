@@ -36,7 +36,7 @@ def getUsersAtLocation(buildingId, room, floor, xpos, ypos):
         allUsers = json.loads(conn.getresponse().read().decode('utf-8'))
         users = []
         for user in allUsers:
-            if user['buildingId'] == buildingId and user['room'] == room and user['floor'] == floor and user['xpos'] == xpos and user['ypos'] == ypos]:
+            if user['buildingId'] == buildingId and user['room'] == room and user['floor'] == floor and user['xpos'] == xpos and user['ypos'] == ypos:
                 users.append(user)
         return users
     except Exception as e:
