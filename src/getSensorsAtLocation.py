@@ -1,10 +1,14 @@
 """
 Implements the function getSensorsAtLocation(buildingId, room, floor, x, y)
 Chang Sun, 4/18/2016
+Bishwajit Dutta 5/2/2016 - Modified and Enhanced
 """
 
 import httplib
 import json
+from connectTOnetwork import *
+
+INVALID_SENSOR_LOC_INPUTS_ERROR_CODE = 99998
 
 # ________________________________________________________________
 
@@ -33,10 +37,13 @@ def getSensorsAtLocation(buildingId, room, floor, x, y):
             "type": string
         }
         Returns an empty list if no sensors exist in that location.
-        Returns None if any error occurs.
+        Returns Error Code if any error occurs.
     """
     try:
-        conn = httplib.HTTPConnection('localhost:8080')
+        #input parameer check
+        if buildingId < 0 or room < 0 or floor < 0 or x < 0 or y < 0:
+            return INVALID_SENSOR_LOC_INPUTS_ERROR_CODE
+        conn = connectTOnetwork()
         conn.request('GET', '/api/buildings/' + buildingId + '/sensors/', headers={})
         allSensors = json.loads(conn.getresponse().read().decode('utf-8'))
         sensors = []
@@ -46,7 +53,7 @@ def getSensorsAtLocation(buildingId, room, floor, x, y):
                 sensors.append(sensor)
         return sensors
     except Exception as e:
-        print('Error: ', e)
+        return e
     return None
 
 # ________________________________________________________________

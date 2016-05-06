@@ -1,6 +1,7 @@
 """
 This is the automatic test for function getSensorsAtLocation(buildingId, room, floor, x, y).
 Chang Sun, 4/18/2016
+Bishwajit Dutta 5/2/2016 - Modified and Enhanced
 """
 
 import httplib
@@ -8,6 +9,7 @@ import json
 import unittest
 import time
 from getSensorsAtLocation import *
+from connectTOnetwork import *
 
 # ________________________________________________________________
 
@@ -103,6 +105,10 @@ class TestGetSensorsAtLocation(unittest.TestCase):
                 for floor in range(NUM_FLOORS):
                     for x_pos in range(NUM_XS):
                         for y_pos in range(NUM_YS):
+                            print('******Trying with invalid inputs******')
+                            sensors = getSensorsAtLocation(buildingId, room, -1, x_pos, y_pos)
+                            self.assertEqual(sensors, INVALID_SENSOR_LOC_INPUTS_ERROR_CODE)
+                            print('******Trying with valid inputs******')
                             sensors = getSensorsAtLocation(buildingId, room, floor, x_pos, y_pos)
                             compare = sensorObjs[buildingId][(room, floor, x_pos, y_pos)]
                             self.assertEqual(len(sensors), len(compare))

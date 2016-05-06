@@ -1,12 +1,14 @@
 """
 This is the automatic test for function getSensorData(sensor_type, buildingId, room).
 Chang Sun, 4/11/2016
+Bishwajit Dutta 5/2/2016 - Modified and Enhanced
 """
 
 import httplib
 import json
 import unittest
 from getSensorData import *
+from connectTOnetwork import *
 
 # ________________________________________________________________
 
@@ -20,7 +22,8 @@ NUM_ROOMS_OF_BUILDING = [3, 2]
 
 # ________________________________________________________________
 
-conn = httplib.HTTPConnection('localhost:8080')
+conn = connectTOnetwork()
+
 buildingIds = []
 sensorIds = {}
 
@@ -82,7 +85,7 @@ class TestGetSensorData(unittest.TestCase):
         createObjects()
 
     def test(self):
-        print('******Running test cases******')
+        print('******Running test cases with proper inputs******')
         # building 0
         # room0
         sensorData_IR_room0 = getSensorData('IR', buildingIds[0], 0)
@@ -121,6 +124,21 @@ class TestGetSensorData(unittest.TestCase):
         sensorData_Sonar_room1 = getSensorData('Sonar', buildingIds[1], 1)
         self.assertEqual(sensorData_Sonar_room1,
                          {x : x for x in [sensorIds[buildingIds[1]][3]]})
+        
+        # Use Invalid i/ps
+        print('******Running test cases with invalid inputs******')
+        
+        # invalid building id
+        sensorData_IR_room0 = getSensorData('IR', -1, 0)
+        self.assertEqual(sensorData_IR_room0, INVALID_SENSOR_INPUTS_ERROR_CODE)
+
+        # invalid sensor id
+        sensorData_IR_room1 = getSensorData( -6, buildingIds[1], 1)
+        self.assertEqual(sensorData_IR_room1, INVALID_SENSOR_INPUTS_ERROR_CODE)
+        
+        # invalid room id
+        sensorData_Sonar_room1 = getSensorData('Sonar', buildingIds[1], -11)
+        self.assertEqual(sensorData_Sonar_room1,INVALID_SENSOR_INPUTS_ERROR_CODE )
 
         print('******Finished running test cases******')
 
