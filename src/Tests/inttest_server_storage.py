@@ -18,6 +18,7 @@ from StringIO import StringIO
 import holder
 from server_storage import *
 
+
 # _________________________________________________________________________________________________
 
 
@@ -111,13 +112,12 @@ class IntTestServerStorage(unittest.TestCase):
         super(IntTestServerStorage, self).__init__(*args, **kwargs)
 
     def setUp(self):
-        print('******Running test cases******')
+        print('******Running test case******')
 
     def tearDown(self):
-        print('******Finished running test cases******')
+        print('******Finished running test case******\n')
 
     def test1(self):
-        # Case 1
         print('Case 1: Check integration with MODIFY event')
         id = str(uuid.uuid4())
         history = get_last_states(id)
@@ -128,28 +128,38 @@ class IntTestServerStorage(unittest.TestCase):
         self.assertEqual(1, len(history))
 
     def test2(self):
-        # Case 2
         print('Case 2: Check multiple entries with MODIFY event')
         id = str(uuid.uuid4())
         event = generate_lambda_event('normal', id, 'MODIFY')
         history = get_last_states(id)
-        count = 3
+        self.assertEqual(0, len(history))
+        count = 6
         for i in range(count):
             holder.lambda_handler(event, 0)
-        history1 = get_last_states(id, size=count)
-        self.assertEqual(count, len(history1))
+        history = get_last_states(id, size=count)
+        self.assertEqual(count, len(history))
 
     def test3(self):
-        # Case 3
-        print('Case 3: Check integration with INSERT event')
-        id2 = str(uuid.uuid4())
-        event2 = generate_lambda_event('normal', id2, 'INSERT')
-        history2 = get_last_states(id2)
-        self.assertEqual(0, len(history2))
-        holder.lambda_handler(event2, 0)
-        history2 = get_last_states(id2)
-        self.assertEqual(0, len(history2))
+        print('Case 3: Check excessive entries with MODIFY event')
+        id = str(uuid.uuid4())
+        event = generate_lambda_event('normal', id, 'MODIFY')
+        history = get_last_states(id)
+        self.assertEqual(0, len(history))
+        count = MAX_HISTORY_SIZE + 1
+        for i in range(count):
+            holder.lambda_handler(event, 0)
+        history = get_last_states(id, size=count)
+        self.assertEqual(MAX_HISTORY_SIZE, len(history))
 
+    def test4(self):
+        print('Case 4: Check integration with INSERT event')
+        id = str(uuid.uuid4())
+        event = generate_lambda_event('normal', id, 'INSERT')
+        history = get_last_states(id)
+        self.assertEqual(0, len(history))
+        holder.lambda_handler(event, 0)
+        history = get_last_states(id)
+        self.assertEqual(0, len(history))
 
 
 # _________________________________________________________________________________________________
