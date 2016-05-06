@@ -99,7 +99,7 @@ def get_last_states(objectId, size=1):
             for x in range(size if size <= len(history) else len(history))]
 
 
-def store_state(objectId, state, tstamp=datetime.datetime.now(), out=sys.stdout):
+def store_state(objectId, state, tstamp=None, out=sys.stdout):
     """
     Stores the new state for entity with objectId.
     The default time stamp is the time when this function is invoked.
@@ -118,6 +118,8 @@ def store_state(objectId, state, tstamp=datetime.datetime.now(), out=sys.stdout)
         store_state(id, 0, tstamp=datetime.datetime.now())
     """
     # localize time zone
+    if tstamp == None:
+        tstamp = datetime.datetime.now()
     tstamp = pytz.utc.localize(tstamp)
     history = get_all_states(objectId)
     # error check: new state has to happen later than the previous state
